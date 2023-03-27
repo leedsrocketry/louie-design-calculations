@@ -1,0 +1,6 @@
+Invoking command in '/home/toby/Desktop/louie-design-calculations/build/yeti': /usr/bin/cmake /home/toby/Desktop/louie-design-calculations/src/yeti -DCMAKE_INSTALL_PREFIX=/home/toby/Desktop/louie-design-calculations/install/yeti
+Invoked command in '/home/toby/Desktop/louie-design-calculations/build/yeti' returned '0': /usr/bin/cmake /home/toby/Desktop/louie-design-calculations/src/yeti -DCMAKE_INSTALL_PREFIX=/home/toby/Desktop/louie-design-calculations/install/yeti
+Invoking command in '/home/toby/Desktop/louie-design-calculations/build/yeti': /usr/bin/cmake --build /home/toby/Desktop/louie-design-calculations/build/yeti -- -j8 -l8
+Invoked command in '/home/toby/Desktop/louie-design-calculations/build/yeti' returned '0': /usr/bin/cmake --build /home/toby/Desktop/louie-design-calculations/build/yeti -- -j8 -l8
+Invoking command in '/home/toby/Desktop/louie-design-calculations/build/yeti': /usr/bin/cmake --install /home/toby/Desktop/louie-design-calculations/build/yeti
+Invoked command in '/home/toby/Desktop/louie-design-calculations/build/yeti' returned '0': /usr/bin/cmake --install /home/toby/Desktop/louie-design-calculations/build/yeti

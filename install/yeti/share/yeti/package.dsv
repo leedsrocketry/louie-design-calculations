@@ -1,0 +1,3 @@
+source;share/yeti/hook/pythonpath.ps1
+source;share/yeti/hook/pythonpath.dsv
+source;share/yeti/hook/pythonpath.sh

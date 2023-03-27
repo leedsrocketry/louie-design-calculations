@@ -1,0 +1,8 @@
+[0.007s] Invoking command in '/home/toby/Desktop/louie-design-calculations/build/yeti': /usr/bin/cmake --build /home/toby/Desktop/louie-design-calculations/build/yeti -- -j8 -l8
+[0.033s] Invoked command in '/home/toby/Desktop/louie-design-calculations/build/yeti' returned '0': /usr/bin/cmake --build /home/toby/Desktop/louie-design-calculations/build/yeti -- -j8 -l8
+[0.051s] Invoking command in '/home/toby/Desktop/louie-design-calculations/build/yeti': /usr/bin/cmake --install /home/toby/Desktop/louie-design-calculations/build/yeti
+[0.056s] -- Install configuration: ""
+[0.057s] -- Up-to-date: /home/toby/Desktop/louie-design-calculations/install/yeti/lib/python3.10/site-packages/yeti
+[0.057s] -- Up-to-date: /home/toby/Desktop/louie-design-calculations/install/yeti/lib/python3.10/site-packages/yeti/pressure_drop_circuit.py
+[0.057s] -- Up-to-date: /home/toby/Desktop/louie-design-calculations/install/yeti/lib/python3.10/site-packages/yeti/yeti.py
+[0.084s] Invoked command in '/home/toby/Desktop/louie-design-calculations/build/yeti' returned '0': /usr/bin/cmake --install /home/toby/Desktop/louie-design-calculations/build/yeti

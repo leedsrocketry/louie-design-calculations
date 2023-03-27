@@ -1,0 +1,6 @@
+Invoking command in '/home/toby/Desktop/louie-design-calculations/build/rafiki': /usr/bin/cmake /home/toby/Desktop/louie-design-calculations/src/rafiki -DCMAKE_INSTALL_PREFIX=/home/toby/Desktop/louie-design-calculations/install/rafiki
+Invoked command in '/home/toby/Desktop/louie-design-calculations/build/rafiki' returned '0': /usr/bin/cmake /home/toby/Desktop/louie-design-calculations/src/rafiki -DCMAKE_INSTALL_PREFIX=/home/toby/Desktop/louie-design-calculations/install/rafiki
+Invoking command in '/home/toby/Desktop/louie-design-calculations/build/rafiki': /usr/bin/cmake --build /home/toby/Desktop/louie-design-calculations/build/rafiki -- -j8 -l8
+Invoked command in '/home/toby/Desktop/louie-design-calculations/build/rafiki' returned '0': /usr/bin/cmake --build /home/toby/Desktop/louie-design-calculations/build/rafiki -- -j8 -l8
+Invoking command in '/home/toby/Desktop/louie-design-calculations/build/rafiki': /usr/bin/cmake --install /home/toby/Desktop/louie-design-calculations/build/rafiki
+Invoked command in '/home/toby/Desktop/louie-design-calculations/build/rafiki' returned '0': /usr/bin/cmake --install /home/toby/Desktop/louie-design-calculations/build/rafiki
