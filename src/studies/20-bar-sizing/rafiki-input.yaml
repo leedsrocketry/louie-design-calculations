@@ -8,11 +8,8 @@ design_parameters:
   fuel_wts: [[99.0, 1.0]] # fuel concentrations [%]
   oxidiser: [["LOX"]] # oxidiser blend
   oxidiser_wts: [[100.0]] # oxidiser concentrations [%]
-  chamber_pressure__Pa: [2000000.0] # combustion chamber pressure [Pa]
+  chamber_pressure__Pa: [1000000.0] # combustion chamber pressure [Pa]
   thrust__N: [2000.0] # average thrust [N]
   ox_fuel_ratio: [1.5] # oxidiser-fuel ratio by weight
-  chamber_to_exit_pressure_ratio: [20.0] # chamber to exit pressure ratio (exit is assumed to be the ambient atmospheric pressure on Earth)
+  chamber_to_exit_pressure_ratio: [10.0] # chamber to exit pressure ratio (exit is assumed to be the ambient atmospheric pressure on Earth)
   ambient_operational_pressure__psia: [14.7] # ambient operational pressure, for ground tests this is assumed to be the abmient atomospheric pressure at sea level on Earth. [psia]
-  
-  
-  
