@@ -7,14 +7,16 @@ import pathlib
 RafikiInputFile = "rafiki-input.yaml"
 RafikiOutputFile = "rafiki-output.csv"
 FineTunedRafikiOutputFile = "fine-tuned-rafiki-output.csv"
+yetiInputFile = "yeti-input.yaml"
 
 def main():
 	workingDirectory = str(pathlib.Path(__file__).parent.resolve())
 	rafikiInputFilePath = f"%s/%s" % (workingDirectory, RafikiInputFile)
 	rafikiOutputFilePath = f"%s/%s" % (workingDirectory, RafikiOutputFile)
 	fineTunedRafikiOutputFilePath = f"%s/%s" % (workingDirectory, FineTunedRafikiOutputFile)
+	yetiInputFilePath = f"%s/%s" % (workingDirectory, yetiInputFile)
 
-	print("RUNNING RAFIKI:")
+	print("RUNNING RAFIKI...")
 	sizer = Rafiki(".", rafikiInputFilePath, rafikiOutputFilePath, param_study_mode=False)
 	sizer.run_sizing_conical_noz(save_data=True)
 	
@@ -29,7 +31,12 @@ def main():
 	print("\nRAFIKI OUTPUT VS FINE-TUNED RAFIKI OUTPUT DIFFERENCES: ")
 	print(DeepDiff(rafikiOutput, fineTunedRafikiOutput))
 
-	# TODO: Run yeti...
+	print("\nRUNNING YETI...")
+	cooler = Yeti(".", yetiInputFilePath)
+	cooler.run_cooling_calcs()
+	#cooler.run_thermal_expansion_calcs()
+	#cooler.run_coolant_pressure_drop_calcs()
+	cooler.plot_data()
 
 if __name__ == "__main__":
 	main()
