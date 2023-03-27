@@ -1,0 +1,31 @@
+
+fuel
+oxidiser
+fuel-concentration [%]
+oxidiser-concentration [%]
+oxidiser-fuel-ratio
+
+chamber-pressure_bar
+peak-thrust_N
+
+optimal-ambient-pressure_bar
+
+epsilon
+gamma
+
+specific-impulse_s
+
+
+Molecular Weight [kg/kmol]
+Prandtl Number of Exhaust
+Viscosity of Exhaust [Pa s]
+Thermal Conductivity of Exhaust [W/m/K]
+Total Mass Flow Rate [kg/s]
+Fuel Mass Flow Rate [kg/s]
+Oxidiser Mass Flow Rate [kg/s]
+Throat Area [mm^2]
+Throat Diameter [mm]
+Exit Area [mm^2]
+Exit Diameter [mm]
+Chamber Diameter [mm]
+Chamber Length [mm]
