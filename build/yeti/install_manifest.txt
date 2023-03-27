@@ -1,2 +1,0 @@
-/home/toby/Desktop/louie-design-calculations/install/yeti/lib/python3.10/site-packages/yeti/pressure_drop_circuit.py
-/home/toby/Desktop/louie-design-calculations/install/yeti/lib/python3.10/site-packages/yeti/yeti.py

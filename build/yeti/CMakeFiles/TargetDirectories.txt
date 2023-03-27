@@ -1,6 +1,0 @@
-/home/toby/Desktop/louie-design-calculations/build/yeti/CMakeFiles/edit_cache.dir
-/home/toby/Desktop/louie-design-calculations/build/yeti/CMakeFiles/rebuild_cache.dir
-/home/toby/Desktop/louie-design-calculations/build/yeti/CMakeFiles/list_install_components.dir
-/home/toby/Desktop/louie-design-calculations/build/yeti/CMakeFiles/install.dir
-/home/toby/Desktop/louie-design-calculations/build/yeti/CMakeFiles/install/local.dir
-/home/toby/Desktop/louie-design-calculations/build/yeti/CMakeFiles/install/strip.dir
