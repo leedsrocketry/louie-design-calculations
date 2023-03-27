@@ -34,8 +34,6 @@ def main():
 	print("\nRUNNING YETI...")
 	cooler = Yeti(".", yetiInputFilePath)
 	cooler.run_cooling_calcs()
-	#cooler.run_thermal_expansion_calcs()
-	#cooler.run_coolant_pressure_drop_calcs()
 	cooler.plot_data()
 
 if __name__ == "__main__":

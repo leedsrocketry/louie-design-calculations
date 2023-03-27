@@ -1,5 +1,5 @@
 project_name: "Louie"
-input_data: "/home/toby/Desktop/louie-design-calculations/src/studies/20-bar-sizing/fine-tuned-rafiki-output.csv"
+input_data: "/home/toby/Desktop/louie-design-calculations/src/studies/10-bar-sizing/fine-tuned-rafiki-output.csv"
 cooling_parameters:
   # cooing params
   wall_material: "CopperC106" # Inner wall material
