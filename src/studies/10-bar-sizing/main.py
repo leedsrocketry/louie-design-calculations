@@ -1,40 +1,30 @@
 from rafiki.rafiki import Rafiki
 from yeti.yeti import Yeti
 from deepdiff import DeepDiff
-from csv import DictReader
-import pathlib
+import numpy as np
 
-RafikiInputFile = "rafiki-input.yaml"
-RafikiOutputFile = "rafiki-output.csv"
-FineTunedRafikiOutputFile = "fine-tuned-rafiki-output.csv"
-yetiInputFile = "yeti-input.yaml"
+RafikiDesignInputParameters = ("Isopropanol", "LOX", 99.0, 100.0, 1.5, 2000, np.linspace(10,20,10), 1)
+
+def fineTuneRafikiOutput(rafikiOutput):
+	return {}
 
 def main():
-	workingDirectory = str(pathlib.Path(__file__).parent.resolve())
-	rafikiInputFilePath = f"%s/%s" % (workingDirectory, RafikiInputFile)
-	rafikiOutputFilePath = f"%s/%s" % (workingDirectory, RafikiOutputFile)
-	fineTunedRafikiOutputFilePath = f"%s/%s" % (workingDirectory, FineTunedRafikiOutputFile)
-	yetiInputFilePath = f"%s/%s" % (workingDirectory, yetiInputFile)
+	print("PERFORMING SIZING...")
 
-	print("RUNNING RAFIKI...")
-	sizer = Rafiki(".", rafikiInputFilePath, rafikiOutputFilePath, param_study_mode=False)
-	sizer.run_sizing_conical_noz(save_data=True)
-	
-	with open(rafikiOutputFilePath, 'r') as f:
-		dictReader = DictReader(f)
-		rafikiOutput = list(dictReader)
-	
-	with open(fineTunedRafikiOutputFilePath, 'r') as f:
-		dictReader = DictReader(f)
-		fineTunedRafikiOutput = list(dictReader)
+	sizer = Rafiki(*RafikiDesignInputParameters, displayBranding=False)
+	rafikiOutput = sizer.performConicalNozzleSizing()
+	fineTunedRafikiOutput = fineTuneRafikiOutput(rafikiOutput)
 	
 	print("\nRAFIKI OUTPUT VS FINE-TUNED RAFIKI OUTPUT DIFFERENCES: ")
 	print(DeepDiff(rafikiOutput, fineTunedRafikiOutput))
 
+	# TODO: Make Yeti like Rafiki...
+	'''
 	print("\nRUNNING YETI...")
 	cooler = Yeti(".", yetiInputFilePath)
 	cooler.run_cooling_calcs()
 	cooler.plot_data()
+	'''
 
 if __name__ == "__main__":
 	main()
