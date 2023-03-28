@@ -4,7 +4,7 @@ from deepdiff import DeepDiff
 import numpy as np
 from pprint import pprint
 
-RafikiDesignInputParameters = ("Isopropanol", "LOX", 99.0, 100.0, 1.5, 2000, 10, 1)
+RafikiDesignInputParameters = ("Isopropanol", "LOX", 99.0, 100.0, 1.5, 2000, np.linspace(10,20,10), 1)
 
 FineTunedRafikiOutput = {
 	'Fuel': np.array(['Isopropanol'], dtype='<U11'),
@@ -31,8 +31,8 @@ FineTunedRafikiOutput = {
 
 def main():
 	print("PERFORMING SIZING...")
-	sizer = Rafiki(*RafikiDesignInputParameters, displayBranding=False)
-	rafikiOutput = sizer.performConicalNozzleSizing(displayOutput=False)
+	sizer = Rafiki(*RafikiDesignInputParameters, displayBranding=True)
+	rafikiOutput = sizer.performConicalNozzleSizing(displayOutput=True)
 
 	print("\nRAFIKI OUTPUT VS FINE-TUNED RAFIKI OUTPUT CHANGES: ")
 	pprint(DeepDiff(rafikiOutput, FineTunedRafikiOutput, ignore_order=True, significant_digits=3)["type_changes"])
