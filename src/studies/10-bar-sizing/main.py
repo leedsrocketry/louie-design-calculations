@@ -1,41 +1,47 @@
-from rafiki.rafiki import Rafiki
+from rafiki.rafiki import Rafiki, InputParameters, OutputParameters
 from yeti.yeti import Yeti
 from deepdiff import DeepDiff
 import numpy as np
 from pprint import pprint
 
-RafikiDesignInputParameters = ("Isopropanol", "LOX", 99.0, 100.0, 1.5, 2000, np.linspace(10,20,10), 1)
+RafikiInputParameters = InputParameters(	fuel="Isopropanol",
+											oxidiser="LOX",
+											fuel_concentration=99,
+											oxidiser_concentration=100,
+											oxidiser_fuel_mass_ratio=1.5,
+											peak_thrust__N=2000,
+											chamber_pressure__bar=10,
+											ambient_pressure__bar=1	)
 
-FineTunedRafikiOutput = {
-	'Fuel': np.array(['Isopropanol'], dtype='<U11'),
-	'Oxidiser': np.array(['LOX'], dtype='<U3'),
-	'Fuel Concentration [%]': np.array([99.]),
-	'Oxidiser Concentration [%]': np.array([100.]),
-	'Chamber Pressure [bar]': np.array([10]),
-	'Epsilon': np.array([2.31527158]),
-	'Gamma': np.array([1.15192012]),
-	'Combustion Chamber Temperature [K]': np.array([3092.32065359]),
-	'Molecular Weight [kg/kmol]': np.array([21.03667293]),
-	'Prandtl Number of Exhaust': np.array([0.37877791]),
-	'Viscosity of Exhaust [Pa s]': np.array([8.77097014e-05]),
-	'Thermal Conductivity of Exhaust [W/m/K]': np.array([0.58941253]),
-	'Total Mass Flow Rate [kg/s]': np.array([0.90483487]),
-	'Fuel Mass Flow Rate [kg/s]': np.array([0.36193395]),
-	'Oxidiser Mass Flow Rate [kg/s]': np.array([0.54290092]),
-	'Throat Diameter [mm]': np.array([45]),
-	'Exit Diameter [mm]': np.array([67.92992062]), 
-	'Chamber Diameter [mm]': np.array([100]),
-	'Chamber Length [mm]': np.array([150]),
-}
+# TODO: Put teh correct values in here
+FineTunedRafikiOutputParameters = OutputParameters(	epsilon=2.31527158,
+													gamma=1.15192012,
+													Isp__s=0,
+													Tc__K=3092.32065359,
+													M__kg_per_kmol=0,
+													Pr_exit=0,
+													mu_exit__Pa_s=0,
+													k_exit__W_per_m_K=0,
+													R__J_per_kg_K=0,
+													m_dot__kg_per_s=0,
+													mf_dot__kg_per_s=0,
+													mo_dot__kg_per_s=0,
+													At__mm2=0,
+													Ae__mm2=0,
+													Dc__mm=0,
+													Lc__mm=0,
+													Dt__mm=0,
+													De__mm=0  )
 
 
 def main():
 	print("PERFORMING SIZING...")
-	sizer = Rafiki(*RafikiDesignInputParameters, displayBranding=True)
-	rafikiOutput = sizer.performConicalNozzleSizing(displayOutput=True)
+	sizer = Rafiki(RafikiInputParameters, displayBranding=False)
+	rafikiOutput = sizer.performConicalNozzleSizing()
+	sizer.displayOutput(rafikiOutput)
 
 	print("\nRAFIKI OUTPUT VS FINE-TUNED RAFIKI OUTPUT CHANGES: ")
-	pprint(DeepDiff(rafikiOutput, FineTunedRafikiOutput, ignore_order=True, significant_digits=3)["type_changes"])
+	pprint(DeepDiff(rafikiOutput[0].outputParameters, FineTunedRafikiOutputParameters, ignore_order=True, ignore_numeric_type_changes=True, significant_digits=3)["values_changed"])
 
 	# TODO: Make Yeti like Rafiki...
 	'''
