@@ -1,6 +1,6 @@
 [submodule "src/rafiki"]
 	path = src/rafiki
-	url = ../rafiki.git
+	url = git@github.com:leedsrocketry/rafiki.git
 [submodule "src/yeti"]
 	path = src/yeti
-	url = ../yeti.git
+	url = git@github.com:leedsrocketry/yeti.git
