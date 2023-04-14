@@ -1,34 +1,13 @@
-from rafiki.rafiki import Rafiki, RafikiInputParameters, RafikiOutputParameters
-from yeti.yeti import Yeti, YetiInputParameters, Coolant, PressureDropCircuit
 import numpy as np
 import cusfbamboo as bam
 from CoolProp.CoolProp import PropsSI
 import matplotlib.pyplot as plt
+from rafiki.rafiki import Rafiki, RafikiInputParameters
+from yeti.yeti import Yeti, YetiInputParameters
+import yeti.yeti
 
-# TODO: Move the following back to Yeti:
-# ***
-Water = Coolant(    name="Water",
-                    density__kg_per_m3=lambda T, p: PropsSI("DMASS", "T", T, "P", p, "WATER"),
-                    viscosity__Pa_s=lambda T, p: PropsSI("VISCOSITY", "T", T, "P", p, "WATER"),
-                    conductivity__W_per_m_K=lambda T, p: PropsSI("CONDUCTIVITY", "T", T, "P", p, "WATER"),
-                    specificHeatCapacity__J_per_kg_per_K=lambda T, p: PropsSI("CPMASS", "T", T, "P", p, "WATER"),
-                    prandtl=lambda T, p: PropsSI("PRANDTL", "T", T, "P", p, "WATER"),
-                    laminarRe=2300,
-                    turbulentRe=3500    )
-
-C106Copper = bam.Material(E = 109e9, poisson = 0.34, alpha = 17.9e-6, k = 380.0)
-Al7049 = bam.Material(E = 70e9, poisson = 0.33, alpha = 23.4e-6, k = 160.0)
-Al2219 = bam.Material(E = 73e9, poisson = 0.33, alpha = 22.7e-6, k = 125.0)
-StainlessSteel = bam.Material(E = 193e9, poisson = 0.29, alpha = 16e-6, k = 14.0)
-#***
-
-RequiredBurnTime__s = 3
-OFRatios = np.linspace(0.8, 2, 25)
-
-WallThickness__mm = 1
-ChannelHeight__mm = 3.2
-ChannelWidth__mm = 2
-ChannelCount = 30
+RequiredBurnTime__s = 5
+OFRatios = np.linspace(1, 2, 15)
 
 StudyInputParameters = RafikiInputParameters(	fuel="Isopropanol",
 												oxidiser="LOX",
@@ -41,67 +20,16 @@ StudyInputParameters = RafikiInputParameters(	fuel="Isopropanol",
 
 StudyCoolingParameters = YetiInputParameters(	chamberPressure__bar=StudyInputParameters.chamber_pressure__bar.value,
 												rafikiOutput=None,
-												coolant=Water,
-												wallMaterial=Al7049,
-												wallThickness__mm=WallThickness__mm,
-												channelHeight__mm=ChannelHeight__mm,
-												channelCount=ChannelCount,
+												coolant=yeti.yeti.Water,
+												wallMaterial=yeti.yeti.Al7049,
+												wallThickness__mm=1,
+												channelHeight__mm=3,
+												channelWidth__mm=2,
+												channelCount=40,
 												blockageRatio=None,
 												coolantInletTemperature__degC=25,
-												coolantInletPressure__bar=23,
+												coolantInletPressure__bar=25,
 												coolantMassFlowRate__kg_per_s=5	)
-
-class BlockageRatioGenerator():
-	def __init__(self, engineGeometry__mm, wallThickness__mm, channelHeight__mm, channelWidth__mm, channelCount):
-		self.wallThickness__mm = wallThickness__mm
-		self.channelHeight__mm = channelHeight__mm
-		self.channelWidth__mm = channelWidth__mm
-		self.channelCount = channelCount
-
-		self.channelRadius__mm = ChannelWidth__mm / 2
-		self.xs__mm, self.rs__mm = self.formatEngineGeometry(engineGeometry__mm)
-	
-	def formatEngineGeometry(self, engineGeometry__mm):
-		formattedEngineGeometry__mm = np.array(engineGeometry__mm.value).transpose()
-
-		return formattedEngineGeometry__mm[0], formattedEngineGeometry__mm[1]
-	
-	# Good luck understand this one...
-	# Essentially, we're calculating the flow area in a channel formed by cutting a vertical slot in a cyclinder with a ballnose end mill
-	def calculateChannelCSA(self, finExternalRadius__mm):
-		theta = 2 * np.arcsin((self.channelWidth__mm / 2) / finExternalRadius__mm)
-		sectorArea__mm2 = (theta * np.pi * finExternalRadius__mm**2) / (2 * np.pi)
-		triangleArea__mm2 = (self.channelWidth__mm / 2) * np.sqrt((finExternalRadius__mm**2) - ((self.channelWidth__mm**2) / 4))
-		segmentArea__mm2 = sectorArea__mm2 - triangleArea__mm2
-
-		rectangleHeight__mm = self.channelHeight__mm - self.channelRadius__mm
-		rectangleArea__mm2 = rectangleHeight__mm * self.channelWidth__mm
-
-		semicircleArea__mm2 = (np.pi * self.channelRadius__mm**2) / 2
-
-		channelArea__mm2 = segmentArea__mm2 + rectangleArea__mm2 + semicircleArea__mm2
-
-		return channelArea__mm2
-	
-	# TODO: Consider moving the following function to Yeti
-	def generateBlockageRatio(self):
-		def f(x__m):
-			x__mm = x__m * 1000
-			r__mm = np.interp(x__mm, self.xs__mm, self.rs__mm)
-
-			r_inner__mm = r__mm + (self.wallThickness__mm)
-			r_outer__mm = r_inner__mm + (self.channelHeight__mm)
-			
-			total_area__mm2 = (pow(r_outer__mm, 2) * np.pi) - (pow(r_inner__mm, 2) * np.pi)
-			channel_area__mm2 = self.calculateChannelCSA(r__mm)
-			total_channel_area__mm2 = channel_area__mm2 * self.channelCount
-			blockage_ratio = (total_area__mm2 - total_channel_area__mm2) / total_area__mm2
-
-			#print(channel_area__mm2, blockage_ratio)
-
-			return blockage_ratio
-		
-		return f
 		
 def main():
 	rafiki = Rafiki(StudyInputParameters, displayBranding=False)
@@ -138,13 +66,7 @@ def main():
 			print(f"IGNORING RUN DUE TO INSUFFICIENT BURN TIME")
 			continue
 
-		# Blockage ratio function needs recalculating for each run as it depends on the run geometry
-		blockageRatioGenerator = BlockageRatioGenerator(	engineGeometry__mm=run.outputParameters.engineGeometry__mm,
-															wallThickness__mm=WallThickness__mm,
-															channelHeight__mm=ChannelHeight__mm,
-															channelWidth__mm=ChannelWidth__mm, 
-															channelCount=ChannelCount	)
-		StudyCoolingParameters.blockageRatio = blockageRatioGenerator.generateBlockageRatio()
+		# Rafiki output parameters need updating for each run	
 		StudyCoolingParameters.rafikiOutput = run.outputParameters
 
 		# Perform the cooling calculations
@@ -165,6 +87,7 @@ def main():
 		specificImpulses__s[i] = run.outputParameters.Isp__s.value
 		maximumTangentialStresses__MPa[i] = maximumTangentialStress__MPa
 
+		print(f"\tO/F MASS RATIO: %f" % run.inputParameters.oxidiser_fuel_mass_ratio.value)
 		print(f"\tFUEL MASS FLOW RATE: %f kg/s" % run.outputParameters.mf_dot__kg_per_s.value)
 		print(f"\tOXIDISER MASS FLOW RATE: %f kg/s" % run.outputParameters.mf_dot__kg_per_s.value)
 		print(f"\tBURN TIME: %f s" % maximumBurnTime__s)
