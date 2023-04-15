@@ -8,7 +8,7 @@ StudyInputParameters = RafikiInputParameters(	fuel="Isopropanol",
 												oxidiser="LOX",
 												fuel_concentration=FuelConcentrations,
 												oxidiser_concentration=100,
-												oxidiser_fuel_mass_ratio=1.2, # TODO:Decide what we would likle this to be
+												oxidiser_fuel_mass_ratio=1.2,
 												peak_thrust__N=2000,
 												chamber_pressure__bar=10,
 												ambient_pressure__bar=1	)
