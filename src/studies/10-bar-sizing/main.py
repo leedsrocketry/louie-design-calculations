@@ -1,5 +1,77 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from deepdiff import DeepDiff
+from pprint import pprint
+from rafiki.rafiki import Rafiki, RafikiInputParameters, RafikiOutputParameters
+from yeti.yeti import Yeti, YetiInputParameters
+import yeti.yeti
+from injector import TripletInjector
 
-'''def performCoolantPressureDropCalculations(inputParameters, cooling_data):
+# Using IPA and LOX densities respecitivey
+FuelDensity__kg_per_m3 = 786
+OxidiserDensity__kg_per_m3 = 1141
+
+InputParameters = RafikiInputParameters(	fuel="Isopropanol",
+											oxidiser="LOX",
+											fuel_concentration=99,
+											oxidiser_concentration=100,
+											oxidiser_fuel_mass_ratio=1.2,
+											peak_thrust__N=2000,
+											chamber_pressure__bar=10,
+											ambient_pressure__bar=1	)
+
+FineTunedRafikiOutputParameters = RafikiOutputParameters(	epsilon=2.193,
+															gamma=1.214,
+															Isp__s=214.838,
+															Tc__K=2668.905,
+															M__kg_per_kmol=18.940,
+															Pr_exit=0.412,
+															mu_exit__Pa_s=8.792e-05,
+															k_exit__W_per_m_K=0.419,
+															R__J_per_kg_K=438.958,
+															m_dot__kg_per_s=0.949,
+															mf_dot__kg_per_s=0.431,
+															mo_dot__kg_per_s=0.518,
+															engineGeometry__mm=((-212.3, 50), (-62.3, 50), (0, 22.5), (44.9, 34)))
+
+CoolingParameters = YetiInputParameters(	chamberPressure__bar=InputParameters.chamber_pressure__bar.value,
+											rafikiOutput=FineTunedRafikiOutputParameters,
+											coolant=yeti.yeti.Water,
+											wallMaterial=yeti.yeti.Al7049,
+											wallThickness__mm=1,
+											channelHeight__mm=3,
+											channelWidth__mm=2,
+											channelCount=40,
+											blockageRatio=None,
+											coolantInletTemperature__degC=25,
+											coolantInletPressure__bar=25,
+											coolantMassFlowRate__kg_per_s=5	)
+
+# TODO: Review element count
+Injector = TripletInjector(dischargeCoefficient=0.65, elementCount=8, pressureDrop__bar=6)
+
+def calculateInjectorGeometry(mf_dot__kg_per_s, mo_dot__kg_per_s, fuelDensity__kg_per_m3, oxdiserDensity__kg_per_m3, injector):
+	# Source: http://athena.leedsrocketry.co.uk/doku.php?id=louie_injector_desgin
+	fuelArea__mm2 = (mf_dot__kg_per_s / (injector.dischargeCoefficient * np.sqrt(2 * fuelDensity__kg_per_m3 * injector.pressureDrop__Pa))) * 10**6
+	oxidiserArea__mm2 = (mo_dot__kg_per_s / (injector.dischargeCoefficient * np.sqrt(2 * oxdiserDensity__kg_per_m3 * injector.pressureDrop__Pa))) * 10**6
+
+	injector.fuelOrificeDiameter__mm = np.sqrt((2 * fuelArea__mm2) / (injector.elementCount * np.pi))
+	injector.oxidiserOrificeDiameter__mm = 2 * np.sqrt(oxidiserArea__mm2 / (injector.elementCount * np.pi))
+
+def displayFineTunedParameters(rafikiOutput):
+	print("\nRAFIKI OUTPUT VS FINETUNED VALUES: ")
+	pprint(DeepDiff(rafikiOutput[0].outputParameters, FineTunedRafikiOutputParameters, ignore_order=True, ignore_numeric_type_changes=True, significant_digits=3)["values_changed"])
+
+def calculateBurnTime(outputParameters):
+	# Work out the maximum burn time according to the tank volumes and denisties of the fuel and oxidiser according to AEL's ICD
+	# (we've assumed the LOX tank volume will be no less than that of the NO2 tank)
+	maximumFuelBurnTime__s = ((3.5 * 0.786) / outputParameters.mf_dot__kg_per_s.value)
+	maximumOxidiserBurnTime__s = ((10 * 1.141) / outputParameters.mo_dot__kg_per_s.value)
+	maximumBurnTime__s = min(maximumFuelBurnTime__s, maximumOxidiserBurnTime__s)
+
+	return maximumBurnTime__s
+
+def calculateCoolantPressureDrop(rafikiOutput, inputParameters, cooling_data):
 	"""
 	Pressure drop assumptions:
 		- Inlet and outlet distribution rings are pipes curved along a half-circular arc of the
@@ -13,7 +85,7 @@
 	T = inputParameters.coolantInletTemperature__K
 	p = inputParameters.coolantInletPressure__Pa
 
-	formattedEngineGeometry__m = np.array(FineTunedRafikiOutputParameters.engineGeometry__mm.value).transpose() / 1000
+	formattedEngineGeometry__m = np.array(rafikiOutput.engineGeometry__mm.value).transpose() / 1000
 
 	xs__m = formattedEngineGeometry__m[0]
 	rs__m = formattedEngineGeometry__m[1]
@@ -199,32 +271,48 @@
 	# complete pressure drop calcs
 	pressure_circuit.calc_total_pressure_drop()
 
-	# plot pressure drop across across the cooling system
-	pressure_circuit.plot_pressure_drop()'''
-
+def main():
+	# Generate the finetuned engine parameters
+	rafiki = Rafiki(InputParameters, displayBranding=False)
+	rafikiOutput = rafiki.performConicalNozzleSizing()
 	
-	
+	displayFineTunedParameters(rafikiOutput)
 
+	# Calculate the burn time
+	maximumBurnTime__s = calculateBurnTime(FineTunedRafikiOutputParameters)
 
-	#print("\nRAFIKI OUTPUT VS YETI'S RAFIKI INPUT: ")
-	#pprint(DeepDiff(rafikiOutput[0].outputParameters, StudyCoolingParameters.rafikiOutput, ignore_order=True, ignore_numeric_type_changes=True, significant_digits=2)["values_changed"])
-	
-	#performCoolantPressureDropCalculations(StudyCoolingParameters, yetiOutput)
-	#yeti.plot(yetiOutput)
+	# Perform the cooling calculations
+	yeti = Yeti(CoolingParameters, displayBranding=False)
+	yetiOutput = yeti.performCoolingCalculations()
 
-	#bam.plot.plot_temperatures(yetiOutput, only_indexes=(1, 2))
-	#bam.show()
+	# Perform the injector orifice calculations
+	calculateInjectorGeometry(	FineTunedRafikiOutputParameters.mf_dot__kg_per_s.value,
+								FineTunedRafikiOutputParameters.mo_dot__kg_per_s.value,
+								FuelDensity__kg_per_m3,
+								OxidiserDensity__kg_per_m3,
+								Injector	)
 
-	FineTunedRafikiOutputParameters = RafikiOutputParameters(	epsilon=2.31527158,
-															gamma=1.15192012,
-															Isp__s=225.1510814623686,
-															Tc__K=3092.32065359,
-															M__kg_per_kmol=21.130804766518622,
-															Pr_exit=0.37870201606050513,
-															mu_exit__Pa_s=8.792209086026814e-05,
-															k_exit__W_per_m_K=0.5966703407983297,
-															R__J_per_kg_K=393.4540161562319,
-															m_dot__kg_per_s=0.905496864793369,
-															mf_dot__kg_per_s=0.3621987459173476,
-															mo_dot__kg_per_s=0.5432981188760214,
-															engineGeometry__mm=((-212.3, 50), (-62.3, 50), (0, 22.5), (44.9, 34)))
+	# Perform the pressure drop calculations
+	calculateCoolantPressureDrop(FineTunedRafikiOutputParameters, CoolingParameters, yetiOutput)
+
+	# TODO: Write this function...
+	#calculateInjectorPressureDrop()
+
+	# Display output
+	print("\n*** RESULTS ***")
+	print("PERFORMANCE:")
+	print(f"\tSPECIFIC IMPULSE: %.2f s" % FineTunedRafikiOutputParameters.Isp__s.value)
+	print(f"\tBURN TIME: %.0f s" % maximumBurnTime__s)
+
+	print("\nDIMENSIONS:")
+	print(f"\tCHAMBER COORDINATES: %s MM" % str(FineTunedRafikiOutputParameters.engineGeometry__mm.value))
+	print(f"\tFUEL ORIFICE DIAMETER: %.1f MM" % Injector.fuelOrificeDiameter__mm)
+	print(f"\tOXIDISER ORIFICE DIAMETER: %.1f MM" % Injector.oxidiserOrificeDiameter__mm)
+
+	print("\nREQUIREMENTS:")
+	print(f"\tFUEL MASS FLOW RATE: %.2f kg/s" % FineTunedRafikiOutputParameters.mf_dot__kg_per_s.value)
+	print(f"\tOXIDISER MASS FLOW RATE: %.2f kg/s" % FineTunedRafikiOutputParameters.mf_dot__kg_per_s.value)
+	print("***************")
+
+if __name__ == "__main__":
+	main()
