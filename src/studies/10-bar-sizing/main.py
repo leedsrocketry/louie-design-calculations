@@ -1,15 +1,12 @@
 import numpy as np
-import matplotlib.pyplot as plt
 from deepdiff import DeepDiff
 from pprint import pprint
-from CoolProp.CoolProp import PropsSI
 from rafiki.rafiki import Rafiki, RafikiInputParameters, RafikiOutputParameters
 from yeti.yeti import Yeti, YetiInputParameters
 from yeti.pressure_drop_circuit import PressureDropCircuit
 import yeti.yeti
 from injector import TripletInjector
 
-# TODO: Think about absoluet vs gauge pressure...
 FuelDensity__kg_per_m3 = 786
 FuelViscosity__Pa_s=0.00237
 
@@ -114,9 +111,8 @@ def calculateCoolantPressureDrop(coolingParameters, cooling_data):
 	channel_width__m = (2/1000)
 
 	# build the pressure drop circuit
-	pressure_circuit = PressureDropCircuit( massFlowRate__kg_per_s=coolingParameters.coolantMassFlowRate__kg_per_s,
-											fluidDensity__kg_per_m3=coolingParameters.coolant.density__kg_per_m3(T, p),
-											fluidViscosity__Pa_s=coolingParameters.coolant.viscosity__Pa_s(T, p)	)
+	pressure_circuit = PressureDropCircuit( coolingParameters.coolantMassFlowRate__kg_per_s, coolingParameters.coolant.density__kg_per_m3(T, p), coolingParameters.coolant.viscosity__Pa_s(T, p))
+
 	# delivery pipe
 	pressure_circuit.add_straight_pipes_circ(	r__m=cool_delivery_d__m/2,
 												n_pipes=1,
@@ -230,17 +226,16 @@ def calculateCoolantPressureDrop(coolingParameters, cooling_data):
 
 	return totalPressureDrop__bar
 
-def calculateInjectorManifoldPressureDrop(fuelDensity__kg_per_m3, fuelViscosity__Pa_s, oxidiserDensity__kg_per_m3, oxidiserViscosity__Pa_s):
-	fuelCircuit = PressureDropCircuit(fuelDensity__kg_per_m3, fuelViscosity__Pa_s)
-	oxidiserCircuit = PressureDropCircuit(oxidiserDensity__kg_per_m3, oxidiserViscosity__Pa_s)
+def calculateInjectorManifoldPressureDrop(fuelMassFlowRate__kg_per_s, oxidiserMassFlowRate__kg_per_s, fuelDensity__kg_per_m3, fuelViscosity__Pa_s, oxidiserDensity__kg_per_m3, oxidiserViscosity__Pa_s):
+	fuelCircuit = PressureDropCircuit(fuelMassFlowRate__kg_per_s, fuelDensity__kg_per_m3, fuelViscosity__Pa_s)
+	oxidiserCircuit = PressureDropCircuit(oxidiserMassFlowRate__kg_per_s, oxidiserDensity__kg_per_m3, oxidiserViscosity__Pa_s)
 	
 	# TODO: Write all the stuff here...
 	
-	# complete pressure drop calcs
 	fuelPressureDrop__bar = fuelCircuit.calc_total_pressure_drop() / 100000
 	oxidiserPressureDrop__bar = oxidiserCircuit.calc_total_pressure_drop() / 100000
 
-	return fuelPressureDrop__bar, oxidiserPressureDrop__bar
+	return 0, 0 # fuelPressureDrop__bar, oxidiserPressureDrop__bar
 
 def main():
 	# Generate the finetuned engine parameters
@@ -264,13 +259,15 @@ def main():
 
 	# Perform the pressure drop calculations
 	coolantPressureDrop__bar = calculateCoolantPressureDrop(CoolingParameters, yetiOutput)
-	'''fuelPressureDrop__bar, oxidiserPressureDrop__bar = calculateInjectorManifoldPressureDrop(	FuelDensity__kg_per_m3,
+	fuelPressureDrop__bar, oxidiserPressureDrop__bar = calculateInjectorManifoldPressureDrop(	FineTunedRafikiOutputParameters.mf_dot__kg_per_s.value,
+																								FineTunedRafikiOutputParameters.mo_dot__kg_per_s.value,
+																								FuelDensity__kg_per_m3,
 																								FuelViscosity__Pa_s,
 																								OxidiserDensity__kg_per_m3,
-																								OxidiserViscosity__Pa_s	)'''
+																								OxidiserViscosity__Pa_s	)
 
-	#fuelPressureDrop__bar += Injector.injectorPressureDrop__bar
-	#oxidiserPressureDrop__bar += Injector.injectorPressureDrop__bar
+	fuelPressureDrop__bar += (Injector.pressureDrop__Pa / 100000)
+	oxidiserPressureDrop__bar += (Injector.pressureDrop__Pa / 100000)
 
 	# Display output
 	print("\n*** RESULTS ***")
@@ -287,8 +284,8 @@ def main():
 	print(f"\tFUEL MASS FLOW RATE: %.2f kg/s" % FineTunedRafikiOutputParameters.mf_dot__kg_per_s.value)
 	print(f"\tOXIDISER MASS FLOW RATE: %.2f kg/s" % FineTunedRafikiOutputParameters.mo_dot__kg_per_s.value)
 	print(f"\tCOOLANT PRESSURE DROP: %.2f bar" % coolantPressureDrop__bar)
-	#print(f"\tFUEL PRESSURE DROP: %.2f bar" % fuelPressureDrop__bar)
-	#print(f"\tOXIDISER PRESSURE DROP: %.2f bar" % oxidiserPressureDrop__bar)
+	print(f"\tFUEL PRESSURE DROP: %.2f bar" % fuelPressureDrop__bar)
+	print(f"\tOXIDISER PRESSURE DROP: %.2f bar" % oxidiserPressureDrop__bar)
 	print("***************")
 
 if __name__ == "__main__":
