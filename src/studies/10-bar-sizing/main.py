@@ -69,7 +69,7 @@ def displayFineTunedParameters(rafikiOutput):
 
 def calculateBurnTime(outputParameters):
 	# Work out the maximum burn time according to the tank volumes and denisties of the fuel and oxidiser according to AEL"s ICD
-	# (we"ve assumed the LOX tank volume will be no less than that of the NO2 tank)
+	# (we've assumed the LOX tank volume will be no less than that of the NO2 tank)
 	maximumFuelBurnTime__s = ((3.5 * 0.786) / outputParameters.mf_dot__kg_per_s.value)
 	maximumOxidiserBurnTime__s = ((10 * 1.141) / outputParameters.mo_dot__kg_per_s.value)
 	maximumBurnTime__s = min(maximumFuelBurnTime__s, maximumOxidiserBurnTime__s)
