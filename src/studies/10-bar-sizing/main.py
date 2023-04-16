@@ -46,7 +46,7 @@ CoolingParameters = YetiInputParameters(	chamberPressure__bar=InputParameters.ch
 											channelCount=40,
 											blockageRatio=None,
 											coolantInletTemperature__degC=25,
-											coolantInletPressure__bar=25,
+											coolantInletPressure__bar=30,
 											coolantMassFlowRate__kg_per_s=5	)
 
 # TODO: Review element count
@@ -90,24 +90,24 @@ def calculateCoolantPressureDrop(coolingParameters, cooling_data):
 	cool_delivery_len__m = 1 # length of coolant delivery pipe [m]
 	cool_delivery_d__m = 0.025 # diameter of coolant delivery pipe [m]
 	cool_CD = 0.7 # coolant coefficient of discharge
-	cool_inlet_pipe_d__m = 0.015 # coolant inlet pipe diameter [m]
-	cool_inlet_pipe_len__m = 0.033 # coolant inlet pipe length [m]
-	cool_inlet_ring_r__m = 0.049 # outer radius of the coolant inlet ring [m]
-	cool_inlet_ring_w__m = 0.01 # inlet ring width (modeled as a rectangular pipe) [m]
-	cool_inlet_ring_h__m = 0.008 # inlet ring height (modeled as a rectangular pipe) [m]
-	cool_outlet_pipe_d__m = 0.015 # coolant outlet pipefice diameter [m]
-	cool_outlet_pipe_len__m = 0.033 # coolant outlet pipe length [m]
+	cool_inlet_pipe_d__m = 0.012 # coolant inlet pipe diameter [m]
+	cool_inlet_pipe_len__m = 0.039 # coolant inlet pipe length [m]
+	cool_inlet_ring_r__m = 0.0435 # outer radius of the coolant inlet ring [m]
+	cool_inlet_ring_w__m = 0.0212 # inlet ring width (modeled as a rectangular pipe) [m]
+	cool_inlet_ring_h__m = 0.021 # inlet ring height (modeled as a rectangular pipe) [m]
+	cool_outlet_pipe_d__m = 0.012 # coolant outlet pipefice diameter [m]
+	cool_outlet_pipe_len__m = 0.0325 # coolant outlet pipe length [m]
 	cool_outlet_pipe_n = 4 # number of coolant outlet pipe
-	cool_outlet_ring_r__m = 0.038 # outer radius of the coolant outlet ring [m]
-	cool_outlet_ring_w__m = 0.025 # outlet ring width (modeled as a rectangular pipe) [m]
-	cool_outlet_ring_h__m = 0.01 # outlet ring height (modeled as a rectangular pipe) [m]
+	cool_outlet_ring_r__m = 0.0545 # outer radius of the coolant outlet ring [m]
+	cool_outlet_ring_w__m = 0.016 # outlet ring width (modeled as a rectangular pipe) [m]
+	cool_outlet_ring_h__m = 0.0065 # outlet ring height (modeled as a rectangular pipe) [m]
 	cool_return_len__m = 1 # length of return pipe [m]
 	cool_return_d__m = 0.019 # diameter of return pipe [m]
 	cool_halo_inlet_len__m = 0.02 # length of halo inlet pipe [m]
 	cool_halo_outlet_len__m = 0.02 # length of halo outlet pipe [m]
-	cool_halo_pipe_d__m = 0.011 # diameter of halo inlet pipe [m]
-	cool_halo_ring_d__m = 0.181 # diameter of halo ring [m]
-	cool_halo_tube_d__m = 0.013 # diameter of halo tube [m]
+	cool_halo_pipe_d__m = 0.0127 # diameter of halo inlet pipe [m]
+	cool_halo_ring_d__m = 0.205 # diameter of halo ring [m]
+	cool_halo_tube_d__m = 0.019 # diameter of halo tube [m]
 	channel_width__m = (2/1000)
 
 	# build the pressure drop circuit
@@ -194,7 +194,7 @@ def calculateCoolantPressureDrop(coolingParameters, cooling_data):
 
 	# cooling jacket outlet turn into halo
 	pressure_circuit.add_90deg_turn_circular(	r__m=cool_outlet_pipe_d__m/2,
-												n_pipes=3,
+												n_pipes=4,
 												label="Jacket outlet into halo"	)
 													
 	# halo distribution ring
@@ -224,7 +224,7 @@ def calculateCoolantPressureDrop(coolingParameters, cooling_data):
 	# complete pressure drop calcs
 	totalPressureDrop__bar = pressure_circuit.calc_total_pressure_drop() / 100000
 
-	return totalPressureDrop__bar
+	return pressure_circuit, totalPressureDrop__bar
 
 def calculateInjectorManifoldPressureDrop(fuelMassFlowRate__kg_per_s, oxidiserMassFlowRate__kg_per_s, fuelDensity__kg_per_m3, fuelViscosity__Pa_s, oxidiserDensity__kg_per_m3, oxidiserViscosity__Pa_s):
 	fuelCircuit = PressureDropCircuit(fuelMassFlowRate__kg_per_s, fuelDensity__kg_per_m3, fuelViscosity__Pa_s)
@@ -248,7 +248,7 @@ def main():
 
 	# Perform the cooling calculations
 	yeti = Yeti(CoolingParameters, displayBranding=False)
-	yetiOutput = yeti.performCoolingCalculations()
+	yetiCoolingOutput = yeti.performCoolingCalculations()
 
 	# Perform the injector orifice calculations
 	calculateInjectorGeometry(	FineTunedRafikiOutputParameters.mf_dot__kg_per_s.value,
@@ -258,7 +258,7 @@ def main():
 								Injector	)
 
 	# Perform the pressure drop calculations
-	coolantPressureDrop__bar = calculateCoolantPressureDrop(CoolingParameters, yetiOutput)
+	coolantPressureDropCircuit, coolantPressureDrop__bar = calculateCoolantPressureDrop(CoolingParameters, yetiCoolingOutput)
 	fuelPressureDrop__bar, oxidiserPressureDrop__bar = calculateInjectorManifoldPressureDrop(	FineTunedRafikiOutputParameters.mf_dot__kg_per_s.value,
 																								FineTunedRafikiOutputParameters.mo_dot__kg_per_s.value,
 																								FuelDensity__kg_per_m3,
@@ -286,7 +286,14 @@ def main():
 	print(f"\tCOOLANT PRESSURE DROP: %.2f bar" % coolantPressureDrop__bar)
 	print(f"\tFUEL PRESSURE DROP: %.2f bar" % fuelPressureDrop__bar)
 	print(f"\tOXIDISER PRESSURE DROP: %.2f bar" % oxidiserPressureDrop__bar)
+	print(f"\tLONGDITUDINAL THERMAL EXPANSION: %.2f MM" % yetiCoolingOutput["longditudinal_thermal_expansion__mm"])
 	print("***************")
+	
+	# All plots
+	yeti.plot_main_results(yetiCoolingOutput)
+	yeti.plot_aux_results(yetiCoolingOutput)
+	coolantPressureDropCircuit.plot_pressure_drop()
+	
 
 if __name__ == "__main__":
 	main()
