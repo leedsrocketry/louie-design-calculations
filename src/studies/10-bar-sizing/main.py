@@ -1,3 +1,6 @@
+import os
+import sys
+import inspect
 import numpy as np
 from deepdiff import DeepDiff
 from pprint import pprint
@@ -241,10 +244,20 @@ def main():
 	# Generate the finetuned engine parameters
 	rafiki = Rafiki(InputParameters, displayBranding=False)
 	rafikiOutput = rafiki.performConicalNozzleSizing()
+	
 	displayFineTunedParameters(rafikiOutput)
 
 	# Calculate the burn time
 	maximumBurnTime__s = calculateBurnTime(FineTunedRafikiOutputParameters)
+
+	# Save Rafiki data
+	rootdir = os.path.dirname(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))
+	data_path = rootdir + "/10-bar-sizing/data/"
+	if not os.path.exists(data_path):
+		os.makedirs(data_path)
+	rafiki.generateCSV(rafikiOutput, rootdir+"10bar_raw.csv")
+	rafikiOutput[0].outputParameters = FineTunedRafikiOutputParameters
+	rafiki.generateCSV(rafikiOutput, rootdir+"10bar_fine_tuned.csv")
 
 	# Perform the cooling calculations
 	yeti = Yeti(CoolingParameters, displayBranding=False)
