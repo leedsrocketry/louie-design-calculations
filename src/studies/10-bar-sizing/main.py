@@ -49,7 +49,7 @@ CoolingParameters = YetiInputParameters(	chamberPressure__bar=InputParameters.ch
 											channelCount=40,
 											blockageRatio=None,
 											coolantInletTemperature__degC=25,
-											coolantInletPressure__bar=30,
+											coolantInletPressure__bar=25,
 											coolantMassFlowRate__kg_per_s=5	)
 
 # TODO: Review element count
