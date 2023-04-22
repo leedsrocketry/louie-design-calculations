@@ -11,8 +11,7 @@ import yeti.yeti
 from injector import TripletInjector
 
 FuelDensity__kg_per_m3 = 786
-FuelViscosity__Pa_s=0.00237
-
+FuelViscosity__Pa_s = 0.00237
 OxidiserDensity__kg_per_m3 = 1141
 OxidiserViscosity__Pa_s=0.000197
 
@@ -52,8 +51,7 @@ CoolingParameters = YetiInputParameters(	chamberPressure__bar=InputParameters.ch
 											coolantInletPressure__bar=30,
 											coolantMassFlowRate__kg_per_s=5	)
 
-# TODO: Review element count
-Injector = TripletInjector(dischargeCoefficient=0.65, elementCount=8, pressureDrop__bar=6)
+Injector = TripletInjector(dischargeCoefficient=0.65, elementCount=14, pressureDrop__bar=6)
 
 def calculateInjectorGeometry(fuelMassFlowRate__kg_per_s, oxidiserMassFlowRate__kg_per_s, fuelDensity__kg_per_m3, oxdiserDensity__kg_per_m3, injector):
 	# Source: http://athena.leedsrocketry.co.uk/doku.php?id=louie_injector_desgin
