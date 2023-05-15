@@ -113,6 +113,9 @@ def calculateCoolantPressureDrop(coolingParameters, cooling_data):
 	cool_halo_tube_d__m = 0.019 # diameter of halo tube [m]
 	channel_width__m = (2/1000)
 
+	print("deseeeseesntity:  ", coolingParameters.coolant.density__kg_per_m3(T, p))
+	print("viscosityyyyyyy:  ", coolingParameters.coolant.viscosity__Pa_s(T, p))
+
 	# build the pressure drop circuit
 	pressure_circuit = PressureDropCircuit( coolingParameters.coolantMassFlowRate__kg_per_s, coolingParameters.coolant.density__kg_per_m3(T, p), coolingParameters.coolant.viscosity__Pa_s(T, p))
 
